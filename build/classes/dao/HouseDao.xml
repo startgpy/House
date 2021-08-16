@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <!-- namespace映射dao接口的全路径 -->
+<mapper namespace="dao.HouseDao">
+
+    <!-- 分页 -->
+    <select id="select" resultType="House">
+        SELECT id,user_id,type_id,title,street_id,description,price,pubdate,floorage,contact,
+        (SELECT dname FROM district WHERE did= 
+        (SELECT district_id FROM street WHERE sid=street_id)) dname,
+        (SELECT sname FROM street WHERE sid=street_id) sname,
+        (SELECT tname FROM `type` WHERE tid=type_id) tname
+         FROM house WHERE 1=1
+                    
+         <if test="title!='' and title!=null">
+              and title like concat('%',#{title},'%')
+         </if>
+         
+         <if test="did!=0">
+            and street_id in (select sid from street where district_id=#{did})
+         </if>
+         
+         <if test="street_id!=0">
+             and street_id=#{street_id}
+         </if>
+         
+         <if test="type_id!=0">
+            and type_id=#{type_id}
+         </if>
+         
+         <if test="price!=0">
+            <if test="price==1">
+              and price &lt;1000
+            </if>
+            <if test="price==2">
+              and price between 1000 and 3000
+            </if>
+            <if test="price==3">
+              and price &gt;3000
+            </if>
+         </if>
+         
+         <if test="floorage!=0">
+            <if test="floorage==1">
+              and floorage &lt;100
+            </if>
+            <if test="floorage==2">
+              and floorage between 100 and 500
+            </if>
+            <if test="floorage==3">
+              and floorage &gt;500
+            </if>
+         </if>
+         
+         LIMIT #{index},4
+    </select>
+    
+    
+    <!-- 查询总条目数 -->
+    <select id="selectCount" resultType="int">
+       SELECT COUNT(*) FROM house WHERE 1=1
+       
+        <if test="title!='' and title!=null">
+              and title like concat('%',#{title},'%')
+         </if>
+         
+         <if test="did!=0">
+            and street_id in (select sid from street where district_id=#{did})
+         </if>
+         
+         <if test="street_id!=0">
+             and street_id=#{street_id}
+         </if>
+         
+         <if test="type_id!=0">
+            and type_id=#{type_id}
+         </if>
+         
+         <if test="price!=0">
+            <if test="price==1">
+              and price &lt;1000
+            </if>
+            <if test="price==2">
+              and price between 1000 and 3000
+            </if>
+            <if test="price==3">
+              and price &gt;3000
+            </if>
+         </if>
+         
+         <if test="floorage!=0">
+            <if test="floorage==1">
+              and floorage &lt;100
+            </if>
+            <if test="floorage==2">
+              and floorage between 100 and 500
+            </if>
+            <if test="floorage==3">
+              and floorage &gt;500
+            </if>
+         </if>
+    
+    </select>
+    
+    
+    <!-- 按条件查询当个房子的详细信息 -->
+    <select id="selectId" resultType="House">
+       SELECT id,user_id,type_id,title,street_id,description,price,pubdate,floorage,contact,
+        (SELECT dname FROM district WHERE did= 
+        (SELECT district_id FROM street WHERE sid=street_id)) dname,
+        (SELECT sname FROM street WHERE sid=street_id) sname,
+        (SELECT tname FROM `type` WHERE tid=type_id) tname,
+        (SELECT district_id FROM street WHERE sid=street_id) did
+         FROM house WHERE id=#{id}
+    </select>
+    
+    
+    <!-- 根据用户id查全部 -->
+	<select id="selectUserid" resultType="House" >
+	SELECT id,user_id,type_id,title,street_id,description,price,pubdate,floorage,contact,(SELECT dname FROM district WHERE did=(SELECT district_id FROM street WHERE sid=street_id)) dname,
+	(SELECT sname FROM street WHERE sid=street_id) sname,(SELECT tname FROM `type` WHERE tid=type_id ) tname
+	FROM house WHERE user_id=#{user_id}  LIMIT #{index},4
+	</select>
+    
+    
+   <!--根据用户id查总条目数  -->
+    <select id="selectUserIdCount" resultType="int">
+         SELECT COUNT(*) FROM house WHERE user_id=#{user_id}
+    </select>
+    
+    <!-- 添加 -->
+    <insert id="insert">
+         INSERT INTO house(street_id,user_id,type_id,title,description,price,pubdate,floorage,contact) 
+          VALUES(#{street_id},#{user_id},#{type_id},#{title},#{description},#{price},#{pubdate},#{floorage},#{contact})
+    </insert>
+    
+    
+    <!-- 修改 -->
+    <update id="update">
+         UPDATE house SET street_id=#{street_id},type_id=#{type_id},title=#{title},description=#{description},
+		 price=#{price},pubdate=#{pubdate},floorage=#{floorage},contact=#{contact},user_id=#{user_id} 
+		 WHERE id=#{id}
+    </update>
+    
+    
+    <!-- 删除 -->
+    <delete id="delete">
+        DELETE FROM house WHERE id=#{hid}
+    </delete>
+    
+
+</mapper>
